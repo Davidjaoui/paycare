@@ -17,9 +17,11 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 echo '📦 Installation des dépendances...'
-                sh 'pip install --user -r requirements.txt'
-            }
+                withEnv(['HOME=/tmp']) {
+                    sh 'pip install --user -r requirements.txt'
         }
+    }
+}
 
         stage('Run Tests') {
             steps {
