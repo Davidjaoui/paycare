@@ -2,10 +2,11 @@ pipeline {
     agent {
         docker {
             image 'python:3.9-slim'
+        }
+    }
 
-
+    
     stages {
-
         stage('Checkout') {
             steps {
                 echo '🔁 Clonage du dépôt Git...'
@@ -53,11 +54,11 @@ pipeline {
     }
 
     post {
-        failure {
-            echo '❌ Échec du pipeline.'
-        }
         success {
             echo '✅ Pipeline terminé avec succès.'
+        }
+        failure {
+            echo '❌ Échec du pipeline.'
         }
     }
 }
