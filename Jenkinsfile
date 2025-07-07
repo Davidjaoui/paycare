@@ -2,10 +2,15 @@ pipeline {
     agent {
         docker {
             image 'python:3.9-slim'
+            args '-u 1000:1000' // pour éviter les erreurs de permission
         }
     }
 
-    
+    environment {
+        HOME = '/tmp'
+        PATH = '/tmp/.local/bin:$PATH'
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -17,11 +22,9 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 echo '📦 Installation des dépendances...'
-                withEnv(['HOME=/tmp']) {
-                    sh 'pip install --user -r requirements.txt'
+                sh 'pip install --user -r requirements.txt'
+            }
         }
-    }
-}
 
         stage('Run Tests') {
             steps {
@@ -32,32 +35,32 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                echo '🐳 Construction de l\'image Docker...'
-                sh "docker build -t ${IMAGE_NAME} ."
+                echo '🔨 Construction de l\'image Docker...'
+                sh 'docker build -t paycare-app .'
             }
         }
 
         stage('Stop & Remove Existing Container') {
             steps {
-                echo '🧹 Nettoyage du container existant (si présent)...'
-                sh """
-                    docker stop ${CONTAINER_NAME} || true
-                    docker rm ${CONTAINER_NAME} || true
-                """
+                echo '🛑 Arrêt et suppression du conteneur existant (si présent)...'
+                sh '''
+                    docker stop paycare-app || true
+                    docker rm paycare-app || true
+                '''
             }
         }
 
         stage('Run Docker Container') {
             steps {
-                echo '🚀 Démarrage du container Docker...'
-                sh "docker run -d --name ${CONTAINER_NAME} -p 8081:8080 ${IMAGE_NAME}"
+                echo '🚀 Lancement du conteneur Docker...'
+                sh 'docker run -d --name paycare-app -p 8000:8000 paycare-app'
             }
         }
     }
 
     post {
         success {
-            echo '✅ Pipeline terminé avec succès.'
+            echo '✅ Déploiement réussi.'
         }
         failure {
             echo '❌ Échec du pipeline.'
