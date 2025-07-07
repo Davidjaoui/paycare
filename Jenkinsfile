@@ -1,5 +1,7 @@
 pipeline {
-    agent any  // utilise un agent Jenkins par défaut
+    agent {
+        docker {
+            image 'python:3.9-slim'
 
 
     stages {
